@@ -1,0 +1,39 @@
+code_name:
+    name:
+     - command
+     - alias1
+     - alias2
+    # This root class tells the actions where to look."
+    class: "com.example.bukkit.commands.CommandClass"
+    # The command helper shows helpful information when a syntax violation has occured.
+    # It should have the signature: org.bukkit.commmand.CommandSender sender, com.gmail.klezst.bukkit.bukkitutil.command.HelpType helpType
+    help: "commandHelper"
+    actions:
+        # /command action1 <>
+        action1:
+            name:
+             - action1
+             - alias1
+             - alias2
+            # By default, action handler methods should follow the signature:
+            # public static void (org.bukkit.command.CommandSender sender, org.bukkit.command.Command command,
+            #     java.lang.String name, java.util.List<com.gmail.klezst.bukkit.bukkitutil.command.Descriptor> actionTree, java.lang.String[] args)
+            # Action handler methods have precedence over sub-actions.
+            method: "action1Handler"
+            # If the action is handled by a method then the minArg and maxArg configs are made available.
+            # minArg: 0 to infinity (not required)
+            # maxArg: 0 to infinity (not required)
+            minArg: 0
+            maxArg: -1
+        # /command action2 <>
+        action2:
+            actions:
+                subaction1:
+                    method: "null"
+        # /command ? <>
+        # The "default" action is activated when nothing else fits.
+        # The "default" action acts like any other regular action.
+        default:
+            action:
+                subdefault1:
+                    method: "showDefaultBlah"
