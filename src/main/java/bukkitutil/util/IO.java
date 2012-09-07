@@ -32,10 +32,42 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class IO {
     /**
-     * Copy files from the .jar.
+     * Extracts the files specified by <code>names</code> from a plugin's
+     * jarfile into the plugin's default data directory as defined by the
+     * bukkit <code>PluginManager</code>.
      * 
+     * <p> The <code>extract(plugin, names)</code> method for class
+     * <code>IO</code> has the same effect as:
+     * <pre><code> extract(plugin, plugin.dataFolder(), names) </code></pre>
+     * 
+     * @param plugin
+     *            plugin to extract from
      * @param names
-     *            Names of the files to be copied.
+     *            names of files to extract
+     * 
+     * @throws NullPointerException
+     *             if <code>names</code> is <code>null</code>.
+     * @throws IOException
+     *             if some I/O error occurs
+     * 
+     * @author Klezst
+     * @author sk89q
+     */
+    public static void extract(JavaPlugin plugin, String... names)
+	    throws IOException, NullPointerException {
+    	extract(plugin, plugin.getDataFolder(), names);
+    }
+    
+    /**
+     * Extracts the files specified by <code>names</code> from a plugin's
+     * jarfile into the directory as specified by <code>destination</code>.
+     * 
+     * @param plugin
+     *            plugin to extract from
+     * @param destination
+     *            the extracted file's destination directory
+     * @param names
+     *            names of files to extract
      * 
      * @throws NullPointerException
      *             If name is null.
@@ -45,48 +77,47 @@ public class IO {
      * @author Klezst
      * @author sk89q
      */
-    public static void extract(JavaPlugin plugin, String... names)
+    public static void extract(JavaPlugin plugin, File destination, String... names)
 	    throws IOException, NullPointerException {
-	// Create directory.
-	File folder = plugin.getDataFolder();
-	folder.mkdirs();
-	
-	for (String name : names) {
-	    // Check, if file already exists.
-	    // throws NullPointerException if name is null.
-	    File actual = new File(plugin.getDataFolder(), name);
-	    if (!actual.exists()) {
-		// Get input.
-		InputStream input = plugin.getResource("resources/" + name);
-		if (input == null) {
-		    throw new IOException(
-			    "Unable to get InputStream for INTERNAL file "
-				    + name
-				    + ". Please contact plugin developer.");
-		}
-
-		// Get & write to output
-		FileOutputStream output = null;
-		try {
-		    output = new FileOutputStream(actual);
-		    byte[] buf = new byte[8192];
-		    int length = 0;
-		    while ((length = input.read(buf)) > 0) {
-			output.write(buf, 0, length); // throws IOException, if an I/O error occurs.
+		// Create directory.
+	    destination.mkdirs();
+		
+		for (String name : names) {
+		    // Check if file already exists.
+		    // throws NullPointerException if name is null.
+		    File actual = new File(destination, name);
+		    if (!actual.exists()) {
+				// Get input.
+				InputStream input = plugin.getResource(name);
+				if (input == null) {
+				    throw new IOException(
+					    "Unable to get InputStream for INTERNAL file "
+						    + name
+						    + ". Please contact plugin developer.");
+				}
+		
+				// Get & write to output
+				FileOutputStream output = null;
+				try {
+				    output = new FileOutputStream(actual);
+				    byte[] buf = new byte[8192];
+				    int length = 0;
+				    while ((length = input.read(buf)) > 0) {
+				    	output.write(buf, 0, length); // throws IOException, if an I/O error occurs.
+				    }
+				}
+		
+				// Close files.
+				finally {
+				    try {
+				    	input.close(); // throws IOException, if an I/O error occurs.
+				    } finally {
+						if (output != null) {
+						    output.close(); // throws IOException, if an I/O error occurs.
+						}
+				    }
+				}
 		    }
 		}
-
-		// Close files.
-		finally {
-		    try {
-			input.close(); // throws IOException, if an I/O error occurs.
-		    } finally {
-			if (output != null) {
-			    output.close(); // throws IOException, if an I/O error occurs.
-			}
-		    }
-		}
-	    }
-	}
     }
 }
